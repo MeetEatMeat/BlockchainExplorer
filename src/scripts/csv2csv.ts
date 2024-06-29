@@ -1,18 +1,11 @@
-import Web3 from 'web3';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import csv from 'csv-parser';
-import cliProgress from 'cli-progress';
 dotenv.config();
 
-const infuraProjectId = process.env.INFURA_PROJECT_ID;
 const csvFolder = "../data/exports";
 const coinbaseCsv = "../data/coinbase.csv";
-
-if (!infuraProjectId) {
-    throw new Error('\nPlease set INFURA_PROJECT_ID in your .env file\n');
-}
 
 const readCSV = (filePath: string): Promise<any[]> => {
     const results: any[] = [];
