@@ -43,14 +43,14 @@ const findAddressesInCSVFiles = async () => {
     const directoryPath = path.resolve(__dirname, csvFolder);
     const files = fs.readdirSync(directoryPath).filter(file => file.endsWith('.csv'));
 
-    console.log("Exports list:\n");
+    console.log(`Exports list: (total: ${files.length})\n`);
     for (let i = 0; i < files.length; i++) {
         const filePath = path.resolve(directoryPath, files[i]);
         console.log(filePath);
     }
     console.log("\n==========================================================");
 
-    console.log("Findings list:\n");
+    console.log(`Findings list:\n`);
     for (let i = 0; i < files.length; i++) {
         const filePath = path.resolve(directoryPath, files[i]);
         const transactions = await readCSV(filePath);
