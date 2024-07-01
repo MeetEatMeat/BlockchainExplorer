@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import csv from 'csv-parser';
+import { Command } from 'commander';
+
 dotenv.config();
 
 const API_KEY = process.env.OPSCAN_APIKEY;
@@ -27,19 +29,19 @@ async function getTransactions(address: string, startBlock: number = 0, endBlock
                 apikey: API_KEY
             }
         });
-        return response.data;
+        return response.data.result;
     } catch (error) {
         console.error('Error fetching transactions:', error);
         throw error;
     }
 }
 
-function readAddressesFromCSV(filePath: string): Promise<string[]> {
+function readAddressesFromCSV(filePath: string): Promise<{ Address: string, Name: string }[]> {
     return new Promise((resolve, reject) => {
-        const addresses: string[] = [];
+        const addresses: { Address: string, Name: string }[] = [];
         fs.createReadStream(filePath)
             .pipe(csv())
-            .on('data', (data) => addresses.push(data.Address))
+            .on('data', (data) => addresses.push(data))
             .on('end', () => resolve(addresses))
             .on('error', (error) => reject(error));
     });
@@ -49,29 +51,58 @@ function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const args = process.argv.slice(2);
-let addresses: string[] = [];
+const program = new Command();
+program
+    .option('-a, --address <address>', 'Ethereum address to query')
+    .option('-n, --number <number>', 'Number of addresses to process from CSV', parseInt);
 
-const addressInput = args[0];
+program.parse(process.argv);
+console.log('Program:', program);
+const options = program.opts();
+console.log('Options:', options);
+
 const csvFilePath = path.resolve(__dirname, '../data/addresses.csv');
+const coinbaseCsvPath = path.resolve(__dirname, '../data/coinbase-optimistic.csv');
 
 (async () => {
+    console.log('Fetching transactions...');
+    let txcount = 0;
+    let cbtxcount = 0;
     try {
-        if (addressInput) {
-            addresses.push(addressInput);
+        const coinbaseAddresses = await readAddressesFromCSV(coinbaseCsvPath);
+        const coinbaseAddressSet = new Set(coinbaseAddresses.map(addr => addr.Address));
+        const coinbaseNames = new Map(coinbaseAddresses.map(addr => [addr.Address, addr.Name]));
+
+        let addresses: string[] = [];
+
+        if (options.address) {
+            addresses.push(options.address);
+        } else if (options.number) {
+            addresses = await readAddressesFromCSV(csvFilePath).then(data => data.slice(0, options.number).map(row => row.Address));
+            console.log("Addresses", addresses);
         } else {
-            addresses = await readAddressesFromCSV(csvFilePath);
-            if (addresses.length === 0) {
-                throw new Error('No addresses found in CSV file.');
-            }
+            addresses = await readAddressesFromCSV(csvFilePath).then(data => data.map(row => row.Address));
+        }
+
+        if (addresses.length === 0) {
+            throw new Error('No addresses found.');
         }
 
         for (const address of addresses) {
             const transactions = await getTransactions(address);
-            console.log(`Transactions for address ${address}:`, transactions);
+            for (const tx of transactions) {
+                txcount++;
+                if (coinbaseAddressSet.has(tx.from) || coinbaseAddressSet.has(tx.to)) {
+                    cbtxcount++;
+                    const fromName = coinbaseNames.get(tx.from) || tx.from;
+                    const toName = coinbaseNames.get(tx.to) || tx.to;
+                    console.log(`From: ${fromName}, To: ${toName}, Transaction hash: ${tx.hash}`);
+                }
+            }
             await delay(1000);
         }
     } catch (error) {
         console.error('Error:', error);
     }
+    console.log(`Total transactions analysed: ${txcount} | Coinbase interactions found: ${cbtxcount}`);
 })();
