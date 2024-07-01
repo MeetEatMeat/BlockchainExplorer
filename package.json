@@ -5,7 +5,9 @@
   "main": "index.ts",
   "scripts": {
     "test": "mocha",
-    "start": "ts-node"
+    "start": "ts-node",
+    "extract": "npm start src/scripts/extract-addresses.ts",
+    "analyse": "npm start src/scripts/blockchain2csv.ts"
   },
   "keywords": [],
   "author": "",
