@@ -57,9 +57,7 @@ program
     .option('-n, --number <number>', 'Number of addresses to process from CSV', parseInt);
 
 program.parse(process.argv);
-console.log('Program:', program);
 const options = program.opts();
-console.log('Options:', options);
 
 const csvFilePath = path.resolve(__dirname, '../data/addresses.csv');
 const coinbaseCsvPath = path.resolve(__dirname, '../data/coinbase-optimistic.csv');

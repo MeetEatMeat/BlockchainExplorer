@@ -7,8 +7,8 @@
     "test": "mocha",
     "start": "ts-node",
     "extract": "npm start src/scripts/extract-addresses.ts",
-    "analyse": "npm start src/scripts/blockchain2csv.ts",
-    "csv-analyse": "npm start src/scripts/csv2csv.ts"
+    "analysis": "npm start src/scripts/blockchain2csv.ts",
+    "csv-analysis": "npm start src/scripts/csv2csv.ts"
   },
   "keywords": [],
   "author": "",
