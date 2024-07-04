@@ -33,7 +33,6 @@ async function getLogs(address: string, page: number = 1, offset: number = 1000)
     }
 }
 
-// Получение параметров из аргументов командной строки
 const address = process.argv[2];
 const outputFilePath = path.resolve(__dirname, '../../output/logs.txt');
 
@@ -73,7 +72,6 @@ if (!address) {
         console.log(`Results saved to ${outputFilePath}`);
 
         console.log('\nSpartan Council members list:');
-        // Преобразуем объект в массив, сортируем и выводим
         const sortedMembers = Object.entries(toCounts).sort((a, b) => b[1] - a[1]);
         sortedMembers.forEach(([member, count]) => {
             console.log(`Member ${member}, voted for ${count} times`);
