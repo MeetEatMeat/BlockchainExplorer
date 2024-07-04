@@ -8,7 +8,8 @@
     "start": "ts-node",
     "extract": "npm start src/scripts/extract-addresses.ts",
     "analysis": "npm start src/scripts/blockchain2csv.ts",
-    "csv-analysis": "npm start src/scripts/csv2csv.ts"
+    "csv-analysis": "npm start src/scripts/csv2csv.ts",
+    "counter": "npm start src/scripts/counter.ts"
   },
   "keywords": [],
   "author": "",
